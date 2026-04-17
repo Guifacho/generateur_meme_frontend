@@ -1,7 +1,7 @@
 export type SharePlatform = 'facebook' | 'twitter' | 'whatsapp' | 'copy'
 
 export function getShareUrl(platform: SharePlatform, memeId: string, memeTitle: string): string {
-  // Crée une URL de partage vers la galerie du mème
+  
   const baseUrl = window.location.origin
   const shareLink = `${baseUrl}?meme=${memeId}`
   const encodedLink = encodeURIComponent(shareLink)

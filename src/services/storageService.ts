@@ -10,10 +10,10 @@ export async function loadGallery(): Promise<MemeData[]> {
     if (!response.ok) throw new Error('Erreur API')
     const data = await response.json()
     
-    // Transformer les données reçues pour avoir les URLs complètes des images
+    
     return data.map((item: any) => ({
       ...item,
-      image: `${UPLOADS_URL}/${item.image}`, // Ajouter l'URL complète
+      image: `${UPLOADS_URL}/${item.image}`, 
     }))
   } catch (error) {
     console.warn('Erreur chargement galerie:', error)
@@ -22,7 +22,7 @@ export async function loadGallery(): Promise<MemeData[]> {
 }
 
 export async function saveGallery(): Promise<void> {
-  // Non utilisé avec API, gardé pour compatibilité
+  
   console.warn('saveGallery non implémenté avec API')
 }
 
