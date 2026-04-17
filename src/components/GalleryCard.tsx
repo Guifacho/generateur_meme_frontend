@@ -25,7 +25,7 @@ export function GalleryCard({ item, onEdit, onDelete }: Props) {
 
   function handleShare(platform: 'facebook' | 'twitter' | 'whatsapp' | 'copy' | 'download') {
     if (platform === 'copy') {
-      copyToClipboard(item.image)
+      copyToClipboard(getShareUrl('copy', item.id, item.title))
         .then(() => {
           alert('Lien copié dans le presse-papiers!')
           setShowShare(false)
@@ -40,8 +40,7 @@ export function GalleryCard({ item, onEdit, onDelete }: Props) {
       link.click()
       setShowShare(false)
     } else {
-      const text = `Découvrez mon mème : ${item.title}`
-      const url = getShareUrl(platform, text)
+      const url = getShareUrl(platform, item.id, item.title)
       openShareWindow(url, `Share-${platform}`)
       setShowShare(false)
     }
@@ -57,7 +56,7 @@ export function GalleryCard({ item, onEdit, onDelete }: Props) {
         <div className="gallery-actions-wrapper">
           <div className="gallery-actions">
             <button type="button" className="button-primary" onClick={() => onEdit(item)}>
-              Ouvrir
+              Modifier
             </button>
             <div className="share-dropdown-container">
               <button type="button" className="button-secondary" onClick={() => setShowShare(!showShare)}>

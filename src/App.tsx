@@ -22,33 +22,30 @@ const defaultText = (id: string): MemeText => ({
   italic: false,
 })
 
-const createEmptyMeme = (): Omit<MemeData, 'id' | 'createdAt'> => ({
-  title: 'Mon mème',
-  image: '',
-  texts: [defaultText(crypto.randomUUID?.() ?? Date.now().toString())],
-})
-
 function App() {
   const [page, setPage] = useState<'home' | 'editor' | 'gallery'>('home')
   const [gallery, setGallery] = useState<MemeData[]>([])
   const [title, setTitle] = useState('Mon mème')
   const [imageSrc, setImageSrc] = useState<string | null>(null)
+  const [imageFile, setImageFile] = useState<File | null>(null)
   const [texts, setTexts] = useState<MemeText[]>([])
   const [selectedTextId, setSelectedTextId] = useState<string | null>(null)
   const [feedback, setFeedback] = useState<string | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
 
   useEffect(() => {
-    setGallery(loadGallery())
+    const loadData = async () => {
+      try {
+        const data = await loadGallery()
+        setGallery(data)
+      } catch (error) {
+        console.error('Erreur chargement galerie:', error)
+        setGallery([])
+      }
+    }
+    loadData()
   }, [])
 
-  useEffect(() => {
-    if (!selectedTextId && texts.length > 0) {
-      setSelectedTextId(texts[0].id)
-    }
-  }, [selectedTextId, texts])
-
-  const selectedText = texts.find((item) => item.id === selectedTextId) ?? null
   const hasMeme = Boolean(imageSrc && texts.length)
 
   function showMessage(message: string) {
@@ -61,6 +58,7 @@ function App() {
     reader.onload = () => {
       if (typeof reader.result === 'string') {
         setImageSrc(reader.result)
+        setImageFile(file)
         showMessage('Image chargée avec succès')
       }
     }
@@ -79,31 +77,53 @@ function App() {
   }
 
   function handleRemoveText(id: string) {
-    setTexts((items) => items.filter((item) => item.id !== id))
+    const nextTexts = texts.filter((item) => item.id !== id)
+    setTexts(nextTexts)
     if (selectedTextId === id) {
-      setSelectedTextId(null)
+      setSelectedTextId(nextTexts[0]?.id ?? null)
     }
   }
 
-  function handleSaveMeme() {
-    if (!imageSrc) {
-      showMessage('Ajoutez une image avant d’enregistrer')
+  async function handleSaveMeme() {
+    if (!imageSrc || !imageFile) {
+      showMessage('Ajoutez une image avant d\'enregistrer')
       return
     }
 
-    const preview = canvasRef.current?.toDataURL('image/png')
-    const meme: MemeData = {
-      id: crypto.randomUUID?.() ?? `${Date.now()}`,
-      title: title || 'Mon mème',
-      image: preview ?? imageSrc,
-      texts,
-      createdAt: new Date().toISOString(),
-    }
+    try {
+      // Créer le blob du canvas (image finale avec texte)
+      const canvasBlob = await new Promise<Blob | null>((resolve) => {
+        canvasRef.current?.toBlob((blob) => resolve(blob), 'image/png')
+      })
 
-    addMeme(meme)
-    setGallery((items) => [meme, ...items])
-    showMessage('Mème enregistré dans la galerie')
+      if (!canvasBlob) {
+        showMessage('Erreur lors de la création du mème')
+        return
+      }
+
+      // Créer le File du canvas pour pouvoir l'envoyer au backend
+      const canvasFile = new File([canvasBlob], `meme-${Date.now()}.png`, { type: 'image/png' })
+
+      const meme: MemeData = {
+        id: crypto.randomUUID?.() ?? `${Date.now()}`,
+        title: title || 'Mon mème',
+        image: '', // Sera rempli par le serveur
+        texts,
+        createdAt: new Date().toISOString(),
+      }
+
+      // Envoyer au backend avec le fichier canvas
+      const createdMeme = await addMeme(meme, canvasFile)
+      setGallery((items) => [createdMeme, ...items])
+      showMessage('Mème enregistré dans la galerie')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erreur inconnue'
+      console.error(error)
+      showMessage(`Erreur: ${message}`)
+    }
   }
+
+  
 
   function handleOpenMeme(item: MemeData) {
     setPage('editor')
@@ -113,15 +133,21 @@ function App() {
     setSelectedTextId(item.texts[0]?.id ?? null)
   }
 
-  function handleDeleteMeme(id: string) {
-    removeMeme(id)
-    setGallery((items) => items.filter((item) => item.id !== id))
-    showMessage('Mème supprimé')
+  async function handleDeleteMeme(id: string) {
+    try {
+      await removeMeme(id)
+      setGallery((items) => items.filter((item) => item.id !== id))
+      showMessage('Mème supprimé')
+    } catch (error) {
+      console.error(error)
+      showMessage('Erreur lors de la suppression')
+    }
   }
 
   function handleResetEditor() {
     setTitle('Mon mème')
     setImageSrc(null)
+    setImageFile(null)
     setTexts([])
     setSelectedTextId(null)
   }

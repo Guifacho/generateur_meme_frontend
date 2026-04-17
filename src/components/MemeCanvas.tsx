@@ -17,7 +17,7 @@ export function MemeCanvas({ imageSrc, texts, width = defaultWidth, height = def
   const combinedRef = canvasRef ?? internalRef
 
   useEffect(() => {
-    const canvas = canvasRef.current
+    const canvas = combinedRef.current
     if (!canvas) {
       return
     }
@@ -67,7 +67,7 @@ export function MemeCanvas({ imageSrc, texts, width = defaultWidth, height = def
         context.fillText(text.content, posX, posY)
       })
     }
-  }, [imageSrc, texts, width, height])
+  }, [imageSrc, texts, width, height, combinedRef])
 
   return (
     <div className="canvas-frame">

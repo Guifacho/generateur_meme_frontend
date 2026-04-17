@@ -1,17 +1,22 @@
 export type SharePlatform = 'facebook' | 'twitter' | 'whatsapp' | 'copy'
 
-export function getShareUrl(platform: SharePlatform, text: string): string {
-  const encodedText = encodeURIComponent(text)
+export function getShareUrl(platform: SharePlatform, memeId: string, memeTitle: string): string {
+  // Crée une URL de partage vers la galerie du mème
+  const baseUrl = window.location.origin
+  const shareLink = `${baseUrl}?meme=${memeId}`
+  const encodedLink = encodeURIComponent(shareLink)
+  const encodedTitle = encodeURIComponent(`Découvrez mon mème: ${memeTitle}`)
+  const text = `${encodedTitle} ${encodedLink}`
 
   switch (platform) {
     case 'facebook':
-      return `https://www.facebook.com/sharer/sharer.php?quote=${encodedText}`
+      return `https://www.facebook.com/sharer/sharer.php?quote=${text}&hashtag=%23meme`
     case 'twitter':
-      return `https://twitter.com/intent/tweet?text=${encodedText}%20%23meme`
+      return `https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedLink}&hashtags=meme`
     case 'whatsapp':
-      return `https://wa.me/?text=${encodedText}`
+      return `https://wa.me/?text=${text}`
     case 'copy':
-      return text
+      return shareLink
     default:
       return ''
   }
