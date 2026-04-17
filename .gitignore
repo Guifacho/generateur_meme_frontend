@@ -25,7 +25,6 @@ dist-ssr
 node_modules
 .git
 .gitignore
-Dockerfile
 README.md
 .env
 .github
