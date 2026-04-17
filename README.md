@@ -2,6 +2,31 @@
 
 Une application web interactive permettant de créer, personnaliser et partager des memes facilement. Cette application offre une interface intuitive pour générer des memes à partir de templates prédéfinis ou d'images personnalisées.
 
+### Architecture générale
+
+L'application fonctionne selon ce flux:
+
+1. **Sélection/Upload** - L'utilisateur choisit un template ou upload une image
+2. **Édition** - Interface interactive pour ajouter et modifier le texte
+3. **Prévisualisation** - Affichage en temps réel du meme via Canvas
+4. **Génération** - Conversion du Canvas en image téléchargeable
+
+## 🎨 Traitement et génération des images
+
+### Processus de génération
+
+- **Canvas HTML5** - Utilisé pour dessiner l'image de base et le texte
+- **Manipulation d'images** - Chargement des templates et images uploadées
+- **Rendu du texte** - Application des styles (police, couleur, taille, position)
+- **Export** - Conversion du Canvas en fichier image (PNG/JPEG) téléchargeable
+
+### Fonctionnalités clés du frontend
+
+- **Gestion des templates** - Chargement et affichage des templates prédéfinis
+- **Upload d'images** - Permettre aux utilisateurs d'importer leurs propres images
+- **Édition dynamique du texte** - Modification en temps réel des propriétés du texte
+- **Prévisualisation instantanée** - Actualisation immédiate du Canvas lors des changements
+- **Téléchargement** - Export de l'image générée au format image standard
 ## 🎯 Fonctionnalités
 
 - Création de memes avec des templates prédéfinis
